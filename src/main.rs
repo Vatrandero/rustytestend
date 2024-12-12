@@ -1,6 +1,7 @@
 mod knowledge_test;
 mod api; 
-mod config; 
+mod cfg; 
 fn main() { 
-todo!();    
+   let default_config = toml::to_string( &cfg::Config::default()).unwrap();
+    print!("{}",default_config);
 }

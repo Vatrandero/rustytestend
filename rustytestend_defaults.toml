@@ -1,0 +1,7 @@
+[db_cfg]
+postgres_url = "postgresql://user:password@localhost/dbname"
+use_tls = false
+
+[net_cfg]
+addreses = ["127.0.0.1"]
+port = 8001
