@@ -16,19 +16,19 @@ struct net_cfg {
     addreses: Vec<String>,
     port: usize,
 }
-impl Default for Config { 
+impl Default for Config {
     fn default() -> Self {
-        let  db_pg = db_pg_cfg{ 
-         postgres_url: "postgresql://user:password@localhost/dbname".to_string(),
-         use_tls: false
+        let db_pg = db_pg_cfg {
+            postgres_url: "postgresql://user:password@localhost/dbname".to_string(),
+            use_tls: false,
         };
-        let ncfg = net_cfg { 
-            addreses: vec![String::from("127.0.0.1")], 
-            port: 8001
+        let ncfg = net_cfg {
+            addreses: vec![String::from("127.0.0.1")],
+            port: 8001,
         };
-        Self{
-            db_cfg: db_pg, 
-            net_cfg: ncfg
+        Self {
+            db_cfg: db_pg,
+            net_cfg: ncfg,
         }
     }
 }
