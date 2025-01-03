@@ -1,5 +1,6 @@
-[db_cfg]
-postgres_url = "postgresql://user:password@localhost/dbname"
+[db_cfg.Postgresql]
+url = "postgresql://user:password@localhost/dbname"
+users_table = "users"
 use_tls = false
 
 [net_cfg]
