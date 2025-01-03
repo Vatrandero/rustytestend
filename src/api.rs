@@ -1,9 +1,17 @@
 //! This module contains
 //! code needed to
 //! communicate with user
-//! via api and keeping connections.
+//! via HTTP/REST apj and keeping connections.
 
 use tokio::net::*;
 use warp::*;
+pub fn init(cfg:crate::cfg::Config){ 
 
-pub fn init() {}
+}
+
+mod user_manage { 
+
+    pub fn create_user() -> Result<(), ()> { 
+        Ok(())
+    }
+}
