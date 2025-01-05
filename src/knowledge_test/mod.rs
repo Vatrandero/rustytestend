@@ -22,10 +22,12 @@ enum Answers {
 /// When new session runs - it creates on this struct instance.
 #[derive(Serialize, Deserialize)]
 pub struct KnolewdgeTest {
-    id: u64,               // TODO: consider using UUID?
-    duration_seconds: i64, // TODO:  consider change to chrono::Datetime
+    id: u64,
+    title: String,
+    description: Option<String>, 
+    duration_seconds: i64,       // TODO:  consider change to chrono::Datetime
     minimum_pass_score: u8,
-    questions: Vec<Rc<[Question]>>,
+    questions: Vec<Question>,
 }
 
 pub struct KtestSession<'session> {
@@ -43,7 +45,7 @@ pub struct Ktestresult<'r> {
     score: usize,
 }
 
-/* lifetime helper blocnk:
+/* lifetime explain blocnk:
     'session: in other module lives as long as testing
         session, e.q while user will not say he completed
         test or timer not reac end.
