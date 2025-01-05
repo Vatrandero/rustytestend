@@ -11,6 +11,7 @@ pub struct Question {
     answers: Vec<Answers>,
 }
 #[derive(Hash, Serialize, Deserialize)]
+#[serde(tag="answer_kind")]
 enum Answers {
     Closed(
         Vec<String>, // contains answers wich may be selected by user..
