@@ -1,10 +1,9 @@
 [package]
 name = "rustytestend"
-version = "0.0.7"
+version = "0.0.8"
 authors = ["Vadim Palatov <vatrandero@gmail.com>"]
 license = "MIT"
 edition = "2021"
-
 [dependencies]
 async-trait = "0.1.83"
 chrono = "0.4.38"

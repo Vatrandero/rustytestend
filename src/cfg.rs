@@ -12,10 +12,10 @@ pub enum db_cfg{
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename="pg")]
 pub struct db_pg_cfg {
-    url: String,
-    users_table: String,
-    use_tls: bool,
-
+    pub host: String, 
+    pub port: Option<u16>, 
+    pub db_name: String,
+    pub use_tls: bool,
 }
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename = "net")]
@@ -26,13 +26,14 @@ pub struct net_cfg {
 impl Default for Config {
     fn default() -> Self {
         let db_pg = db_cfg::Postgresql( db_pg_cfg {
-            url: "postgresql://user:password@localhost/dbname".to_string(),
-            users_table: "users".to_string(),
+            host: String::from("localhost"),
+            db_name: String::from("Testing_system"),
+            port: Some(5432),
             use_tls: false
         });
         let ncfg = net_cfg {
             addreses: vec![String::from("127.0.0.1")],
-            port: 8001,
+            port: 58910,
         };
         Self {
             db_cfg: db_pg,

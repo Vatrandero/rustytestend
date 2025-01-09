@@ -1,8 +1,9 @@
 [db_cfg.Postgresql]
-url = "postgresql://user:password@localhost/dbname"
-users_table = "users"
+host = "localhost"
+#port = 5432
+db_name = "Testing_system"
 use_tls = false
 
 [net_cfg]
 addreses = ["127.0.0.1"]
-port = 8001
+port = 58910
