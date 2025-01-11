@@ -5,11 +5,14 @@ use sqlx::{
     Error as PGSQLError, PgPool, Pool, Postgres,
 };
 use uuid::Uuid;
-pub trait UsersAndSessionManager {
+pub trait UsersManager {
     type Error: std::fmt::Display + std::error::Error;
 
     async fn register_new_user(&self, u: &User) -> Result<(), Self::Error>;
     async fn get_user_by_id(&self, id: u64) -> Result<User, Self::Error>;
+}
+pub trait SessionManager{
+    type Error: std::fmt::Display + std::error::Error; 
     async fn register_new_session(
         &self,
         u: &User,
