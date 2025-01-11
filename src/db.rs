@@ -2,7 +2,7 @@ use crate::cfg::db_pg_cfg;
 use crate::users::*;
 use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},
-    Error as SQLError, PgPool, Pool, Postgres,
+    Error as PGSQLError, PgPool, Pool, Postgres,
 };
 use uuid::Uuid;
 pub trait UsersAndSessionManager {
@@ -38,7 +38,11 @@ impl DBPostgres {
             .await
         {
             Ok(r) => Ok(Self { pool: r }),
-            Err(e) => todo!(),
+            Err(e) => {
+                Err(Box::new(e))     // TODO: Refactor error handling here.
+                                    // TODO: Early check, change pack.
+                                    // TODO: Consider using anyhow crate?
+            },
         }
     }
 }
