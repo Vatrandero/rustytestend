@@ -42,7 +42,7 @@ impl DBPostgres {
         {
             Ok(r) => Ok(Self { pool: r }),
             Err(e) => {
-                Err(Box::new(e))     // TODO: Refactor error handling here.
+                Err(Box::new(e))    // TODO: Refactor error handling here.
                                     // TODO: Early check, change pack.
                                     // TODO: Consider using anyhow crate?
             },
@@ -50,3 +50,27 @@ impl DBPostgres {
     }
 }
  
+impl UsersManager for DBPostgres { 
+    type Error = PGSQLError;
+    async fn register_new_user(&self, u: &User) -> Result<(), Self::Error> {
+        Ok(())
+    }
+    async fn get_user_by_id(&self, id: u64) -> Result<User, Self::Error> {
+        todo!()
+    }
+}
+impl SessionManager for PGSQLError{
+    type Error = PGSQLError;   
+    async fn register_new_session(
+            &self,
+            u: &User,
+            uuid: Option<Uuid>,
+        ) -> Result<Option<Uuid>, Self::Error> {
+        todo!()
+    }
+    async fn resolve_user_session(&self, uid: Uuid) 
+        -> Result<Option<Uuid>, Self::Error> {
+            todo!()
+    }
+
+}
