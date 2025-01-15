@@ -53,7 +53,9 @@ impl DBPostgres {
 impl UsersManager for DBPostgres { 
     type Error = PGSQLError;
     async fn register_new_user(&self, u: &User) -> Result<(), Self::Error> {
-        Ok(())
+         let c = self.pool.acquire().await?;
+            
+        todo!()
     }
     async fn get_user_by_id(&self, id: u64) -> Result<User, Self::Error> {
         todo!()
