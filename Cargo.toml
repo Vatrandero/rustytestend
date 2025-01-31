@@ -1,8 +1,8 @@
 [package]
 name = "rustytestend"
-version = "0.0.8"
+version = "0.0.10"
 authors = ["Vadim Palatov <vatrandero@gmail.com>"]
-license = "MIT"
+license = "MPL-2.0"
 edition = "2021"
 [dependencies]
 async-trait = "0.1.83"
