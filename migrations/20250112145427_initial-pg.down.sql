@@ -1,20 +1,14 @@
-ALTER TABLE IF EXISTS public.sessions
-DROP CONSTRAINT IF EXISTS sessions_user_id_fkey;
 
-ALTER TABLE IF EXISTS public.test_asignments
-DROP CONSTRAINT IF EXISTS test_asignments_test_id_fkey;
 
-ALTER TABLE IF EXISTS public.test_asignments
-DROP CONSTRAINT IF EXISTS test_asignments_user_id_fkey;
-
-ALTER TABLE IF EXISTS public.tests_journal
-DROP CONSTRAINT IF EXISTS tests_journal_test_id_fkey;
-
-ALTER TABLE IF EXISTS public.tests_journal
-DROP CONSTRAINT IF EXISTS tests_journal_user_id_fkey;
-DROP TABLE sessions;
-DROP TABLE test_asignments;
-DROP TABLE tests_journal;
-DROP TABLE tests;
-DROP TABLE users;
+-- NOT FINAL VERSION.
+-- UNTIL LATE STAGES OF DEVELOPMENT OR RELEASE - MAY BE OVERWRITTEN.
+-- AFTER - CREATE NEW MIGRATION SCRIPTS.
+DROP TABLE answers CASCADE;
+DROP TABLE questions CASCADE;  
+DROP TABLE user_sessions CASCADE;
+DROP TABLE test_asignments CASCADE;
+DROP TABLE tests_journal CASCADE;
+DROP TABLE test_sessions CASCADE;
+DROP TABLE tests CASCADE;
+DROP TABLE users CASCADE;
 DROP TYPE IF EXISTS user_role;
