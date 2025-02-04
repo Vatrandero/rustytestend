@@ -8,9 +8,7 @@ CREATE TYPE  user_role AS ENUM
 
 CREATE TABLE IF NOT EXISTS public.answers ( 
     id SERIAL PRIMARY KEY NOT NULL, 
-    question_id INTEGER, 
-    anseer_text TEXT, 
-    is_correct BOOLEAN
+    anseer_text TEXT 
 );
 
 CREATE TABLE IF NOT EXISTS public.questions ( 
@@ -18,6 +16,12 @@ CREATE TABLE IF NOT EXISTS public.questions (
     title VARCHAR(64),
     question_text TEXT NOT NULL
 );
+CREATE TABLE questions_answers_rels ( 
+    answer_id INTEGER NOT NULL, 
+    question_id INTEGER NOT NULL,
+    is_correct BOOLEAN NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS public.test_asignments
 (
     test_id integer NOT NULL,
@@ -92,12 +96,11 @@ CREATE TABLE IF NOT EXISTS public.user_sessions
 COMMENT ON COLUMN public.user_sessions.sid
     IS 'Consider as auth token itself.';
 
-ALTER TABLE IF EXISTS answers 
-    ADD CONSTRAINT answers_question_id_fkey FOREIGN KEY (question_id)
-    REFERENCES public.questions(id)
-    ON UPDATE NO ACTION
-    ON DELETE CASCADE;
-
+ALTER TABLE if EXISTS public.questions_answers_rels 
+    ADD CONSTRAINT question_id_rel_fkey FOREIGN KEY(question_id)
+        REFERENCES public.questions(id), 
+    ADD CONSTRAINT anseer_id_rel_fkey FOREIGN KEY (answer_id)
+        REFERENCES public.answers(id);        
 ALTER TABLE IF EXISTS public.test_sessions 
     ADD CONSTRAINT test_sessions_tests_journal_fkey FOREIGN KEY (journal_record_id) 
         REFERENCES public.tests_journal(id),
