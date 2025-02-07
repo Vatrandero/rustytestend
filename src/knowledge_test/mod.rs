@@ -1,14 +1,19 @@
 pub mod report;
 
 use serde::{Deserialize, Serialize};
-use std::rc::Rc;
-use uuid::Uuid;
 #[derive(Hash, Serialize, Deserialize)]
 pub struct Question {
-    id: u32, // TODO: Consider using UID or tiimestamp?
-    title: String,
-    question_body: String,
-    answers: Vec<Answers>,
+    pub id: u64,
+    pub title: String,
+    pub question_body: String,
+    pub answers: Vec<Answers>,
+}
+
+impl Question {
+    pub fn new(id: u64, title: String, question_body: String, answers: Vec<Answers>) -> Self {
+        Self { id, title, question_body, answers }
+    }
+
 }
 #[derive(Hash, Serialize, Deserialize)]
 enum Answers {
@@ -18,37 +23,44 @@ enum Answers {
     ),
     Open, // answers did not stored as test part, operator need to check answer manualy.
 }
+
+impl Answers {
+ fn is_close_valid(&self) {
+    // TODO: For close answers - check if correct answers coresponds to lenght of answerss vec.
+    todo!()
+ }   
+}
 /// This structure describes a ready-to-go test kit.
 /// When new session runs - it creates on this struct instance.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct KnolewdgeTest {
-    id: u64,
-    title: String,
-    description: Option<String>, 
-    duration_seconds: i64,       // TODO:  consider change to chrono::Datetime
-    minimum_pass_score: u8,
-    questions: Vec<Question>,
+    pub id: u64,
+    pub title: String,
+    pub description: Option<String>,
+    pub max_duration_seconds: i64, // TODO:  consider change to chrono::Datetime
+    pub minimum_pass_score: u8,
+    pub questions: Vec<Question>,
 }
 
-pub struct KtestSession<'session> {
-    sesion_id: Uuid,
-    test: &'session KnolewdgeTest,
+// NOTE: Too short life, prototype.
+pub struct ktAsigment {
+    pub test_id: i64, 
+    pub user_id: i64,
+    pub open_from_timestamp: i64, 
+    pub close_after_time_stamp: i64 
+}
+#[derive(Serialize)]
+pub struct KTestOngoing {
+    sesion_id: u64,
+    test: KnolewdgeTest, // TODO: Consider using Rc<>
     ansered_questions: Vec<(Question, String)>,
     user_id: u64,
     session_start_time: i64,
 }
-
-pub struct Ktestresult<'r> {
-    test: &'r KnolewdgeTest,
-    session_started: i64,
-    session_ended: i64,
+#[derive(Serialize)]
+pub struct Ktestresult {
+    test: KnolewdgeTest,
+    kt_session_started: i64,
+    kt_session_ended: i64,
     score: usize,
 }
-
-/* lifetime explain blocnk:
-    'session: in other module lives as long as testing
-        session, e.q while user will not say he completed
-        test or timer not reac end.
-    'r: consider of it as very short period, while other
-        module preprares result to be sented to client (frontend)
-*/
