@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS public.users
     login cHAR varying(64) NOT NULL,
     password_hash CHAR VARYING(88) NOT NULL, -- sized for SCRYPT N=17,r=8,p=1 string.
     first_name text NOT NULL,
-    second_nane text,
+    second_name text,
     last_name text,
     asigned_role user_role NOT NULL,
     active boolean NOT NULL DEFAULT true,
