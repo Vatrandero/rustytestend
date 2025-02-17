@@ -1,25 +1,32 @@
+use crate::models::dtos::UserRegisterReq;
 use crate::cfg::db_pg_cfg;
-use crate::users::*;
+use crate::models::dtos;
+use crate::models::users::*;
+use crate::models::knowledge_test;
+use async_trait::async_trait; // make traits with async dyn-compatable.
+use passhash::hash_password;
+use std::error::Error;
 use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
+    query,postgres::{PgConnectOptions, PgPoolOptions},
     Error as PGSQLError, PgPool, Pool, Postgres,
 };
 use uuid::Uuid;
-pub trait UsersManager {
-    type Error: std::fmt::Display + std::error::Error;
 
-    async fn register_new_user(&self, u: &User) -> Result<(), Self::Error>;
-    async fn get_user_by_id(&self, id: u64) -> Result<User, Self::Error>;
+#[async_trait]
+pub trait UsersManager {
+
+    async fn register_new_user(&self, u: &UserRegisterReq) -> Result<(), Box<dyn Error>>;
+    async fn get_user_by_id(&self, id: u64) -> Result<User, Box<dyn Error>>;
 }
+#[async_trait]
 pub trait SessionManager{
-    type Error: std::fmt::Display + std::error::Error; 
     async fn register_new_session(
         &self,
         u: &User,
         uuid: Option<Uuid>,
-    ) -> Result<Option<Uuid>, Self::Error>;
+    ) -> Result<Option<Uuid>, Box<dyn Error>>;
     async fn resolve_user_session(&self, uid: Uuid) 
-    -> Result<Option<Uuid>, Self::Error>;
+    -> Result<Option<Uuid>,  Box<dyn Error>>;
 }
 struct DBPostgres {
     pool: Pool<Postgres>,
@@ -42,37 +49,43 @@ impl DBPostgres {
         {
             Ok(r) => Ok(Self { pool: r }),
             Err(e) => {
-                Err(Box::new(e))    // TODO: Refactor error handling here.
-                                    // TODO: Early check, change pack.
-                                    // TODO: Consider using anyhow crate?
-            },
+                Err(Box::new(e)) // TODO: Refactor error handling here.
+                                 // TODO: Early check, change pack.
+                                 // TODO: Consider using anyhow crate?
+            }
         }
     }
 }
- 
-impl UsersManager for DBPostgres { 
-    type Error = PGSQLError;
-    async fn register_new_user(&self, u: &User) -> Result<(), Self::Error> {
-         let c = self.pool.acquire().await?;
-            
+#[async_trait]
+impl UsersManager for DBPostgres {
+    async fn register_new_user(&self, u: &dtos::UserRegisterReq) -> Result<(), Box<dyn Error> > {
+        let mut trx = self.pool.begin().await?;
+        let pass_hash = hash_password(&u.password)?;
+        let q = query!(r#"INSERT INTO users (login, password_hash, first_name,second_name, last_name,
+         asigned_groups, asigned_role )
+        VALUES ($1,$2,$3,$4,$5,$6,($7::text)::user_role  ) 
+         "#,
+        u.login, pass_hash,
+        u.first_name, u.seocnd_name, u.last_name,
+        u.groups_asigned.as_deref(), u.role_asigned  
+         );
+          
         todo!()
     }
-    async fn get_user_by_id(&self, id: u64) -> Result<User, Self::Error> {
+    async fn get_user_by_id(&self, id: u64) -> Result<User, Box<dyn Error>> {
         todo!()
     }
 }
-impl SessionManager for PGSQLError{
-    type Error = PGSQLError;   
+#[async_trait]
+impl SessionManager for PGSQLError {
     async fn register_new_session(
-            &self,
-            u: &User,
-            uuid: Option<Uuid>,
-        ) -> Result<Option<Uuid>, Self::Error> {
+        &self,
+        u: &User,
+        uuid: Option<Uuid>,
+    ) -> Result<Option<Uuid>, Box<dyn Error>> {
         todo!()
     }
-    async fn resolve_user_session(&self, uid: Uuid) 
-        -> Result<Option<Uuid>, Self::Error> {
-            todo!()
+    async fn resolve_user_session(&self, uid: Uuid) -> Result<Option<Uuid>, Box<dyn Error> > {
+        todo!()
     }
-
 }
