@@ -1,3 +1,5 @@
+use axum::response::IntoResponse;
+
 pub(super) mod commons {
     pub use super::super::AppState;
     pub use crate::models;
@@ -33,6 +35,8 @@ pub mod user_and_sesion_managment {
     }
 }
 pub mod admin_handlers {
+    use axum::debug_handler;
+
     use super::commons::*;
 
     // Only admin shall register users.    // The first admin must be registered manually in DBMS
@@ -41,7 +45,7 @@ pub mod admin_handlers {
     #[utoipa::path(post,
             path="usermngr/register",
             request_body=models::dtos::UserRegisterReq)]
-    pub fn register(State(st): State<AppState>, 
+    pub async  fn register(State(st): State<AppState>, 
     rq: Json<models::dtos::UserRegisterReq>) -> StatusCode {
         StatusCode::NOT_IMPLEMENTED
     }

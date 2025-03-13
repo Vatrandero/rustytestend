@@ -1,0 +1,9 @@
+[db_cfg.Postgresql]
+host = "localhost"
+port = 5432
+db_name = "testing_system"
+use_tls = false
+
+[api_cfg]
+api_addres_and_port = "127.0.0.1:8080"
+host_doc = true

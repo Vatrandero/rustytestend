@@ -28,7 +28,7 @@ pub trait SessionManager{
     async fn resolve_user_session(&self, uid: Uuid) 
     -> Result<Option<Uuid>,  Box<dyn Error>>;
 }
-struct DBPostgres {
+pub struct DBPostgres {
     pool: Pool<Postgres>,
 }
 impl DBPostgres {
@@ -36,6 +36,7 @@ impl DBPostgres {
         let mut pgconn_opt = PgConnectOptions::new()
             .application_name("tester_backend")
             .database(&cfg.db_name)
+            .username("postgres")
             .host(&cfg.host)
             .port(if let Some(portf) = cfg.port {
                 portf // Port was provided in config
@@ -77,7 +78,7 @@ impl UsersManager for DBPostgres {
     }
 }
 #[async_trait]
-impl SessionManager for PGSQLError {
+impl SessionManager for DBPostgres {
     async fn register_new_session(
         &self,
         u: &User,
