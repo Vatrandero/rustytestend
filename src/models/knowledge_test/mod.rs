@@ -3,12 +3,22 @@ pub mod report;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 /// internal use only
-#[derive(Hash)]
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct Question {
+    // NOTE: We don't want, and don't need, to expose unernal qyestion id.
+    // If needed - search in DB by order-num in questions array,
+    // they should be same. (ignoring +-1)
+    pub body: String,
+    pub questions: Vec<Answers> 
+
+
+}
+
+#[derive(Deserialize, Serialize, ToSchema ,Hash)]
 pub struct QuestionPriv {
     pub id: u64,
     pub question_body: String,
     pub answers: Vec<AnswersPriv>,
-
 }
 
 impl QuestionPriv {
@@ -18,7 +28,7 @@ impl QuestionPriv {
 
 }
 #[derive(Serialize, Deserialize, ToSchema)]
-pub enum Ansers{
+pub enum Answers{
     Closed{
         avalable: Vec<String>,
         selected: usize // index, started from 0
@@ -26,12 +36,12 @@ pub enum Ansers{
     Open(String)
 }
 /// For internal only use.
-#[derive(Hash )]
+#[derive(Deserialize, Serialize, ToSchema, Hash )]
 pub enum AnswersPriv {
-    Closed(
-        Vec<String>, // contains answers wich may be selected by user..
-        Vec<usize>,  // contain: Answers, indexes of rigt answer
-    ),
+    Closed{
+        given: Vec<String>, // contains answers wich may be selected by user..
+        correct: Vec<usize>,  // contain: Answers, indexes of rigt answer
+    },
     Open, // answers did not stored as test part, operator need to check answer manualy.
 }
 
@@ -42,7 +52,8 @@ impl AnswersPriv {
  }   
 }
 /// This structure describes a ready-to-go test kit.
-/// When new session runs - it creates on this struct instance.
+/// When new session runs - it creates based on this struct instance.
+#[derive(Deserialize, Serialize,  ToSchema)]
 pub struct KnolewdgeTest {
     pub id: u64,
     pub title: String,
@@ -68,12 +79,12 @@ pub struct KTestOngoingPriv {
     user_id: u64,
     session_start_time: i64,
 }
+#[derive(ToSchema)]
 pub struct KTestOngoing { 
     session_id: i64,
     test_id: i64,
+    queestions: Vec<String>
     
-
-
 }
 
 pub struct KtestResult {

@@ -40,10 +40,23 @@ admin is requester - we may want to return
 something better formed.  */
 #[derive(Serialize, ToSchema)]
 pub struct TestListResponse {
-    user_id: i64,
+    user_id: Option<i64>, // Contains value if provided not to solver.
     asigned: Vec<AsignedTestResponse>
 
 }
+
+#[derive(Deserialize, Serialize , ToSchema)]
+pub struct AsignToReq {
+    how: AsignWay,
+    to: Vec<i64>
+}
+
+#[derive(Deserialize, Serialize, ToSchema)]
+pub enum AsignWay {
+    Grouo,
+    Individual
+}
+
 // builds from test and asignment.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct AsignedTestResponse { 
@@ -55,3 +68,21 @@ pub struct AsignedTestResponse {
     pub open_from: i64, 
     pub close_after: i64 
 }
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct QuestionsAddReq{
+    body: String, 
+    questions: Vec<AnswersPriv>        
+}
+
+#[derive(Serialize, Deserialize,  ToSchema)]
+pub struct KTestCreateReq{
+    pub title: String, 
+    pub description: String, 
+    pub max_duration_seconds: i64, 
+    pub minimum_pass_score: u8, 
+    pub questions: Vec<QuestionPriv>        
+
+}
+
+

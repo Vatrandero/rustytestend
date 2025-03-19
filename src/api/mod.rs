@@ -6,9 +6,12 @@ use crate::db::{SessionManager, UsersManager};
 use crate::models::users::User;
 use std::sync::Arc;
 use axum::{Router, routing::{get, post, put}};
-#[cfg(feature = "apidoc")]
 use utoipa::OpenApi;
-
+use utoipauto::utoipauto;
+/// Apidoc - placeholder, filled with 
+/// outout of utoipa.
+#[cfg(feature="apidoc")]
+#[utoipauto] // TODO: Remove utoiauto and fill manualy.
 #[derive(OpenApi)]
 #[openapi(
     
@@ -49,15 +52,20 @@ pub fn init_router(cfg: &crate::cfg::Config, state: AppState) -> axum::Router {
 pub fn builded_openapi_for_router() -> Router<AppState> {
     let openapi = Apidoc::openapi();
     let mut router: Router<AppState> = Router::new();//FIXME: We don;t realy need state here.      
-    let sjson = openapi.to_json().unwrap();
     let syaml = openapi.to_yaml().unwrap();
    // let swagger  utoipa_swagger_ui::SwaggerUi::
     
-    router
-    .route("/schema.json", get(|| async{sjson}))
-    .route("/schema.yaml", get(|| async{syaml}))
-    .merge(utoipa_swagger_ui::SwaggerUi
-        ::new("/swagger-ui")) 
-    // TODO: Swagger should we feature.
+
+   router = router
+    .route("/schema.yaml", get(|| async{syaml}));
+    
+
+    #[cfg(feature="swagger")]
+    {router = router.merge(utoipa_swagger_ui::SwaggerUi
+        ::new("/swagger-ui").url("/doc/schema.yaml", openapi )
+        .config(utoipa_swagger_ui::Config
+            ::default().default_model_rendering("model")));
+    }
+    router 
 
 }
