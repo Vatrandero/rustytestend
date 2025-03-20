@@ -39,7 +39,7 @@ pub fn init_router(cfg: &crate::cfg::Config, state: AppState) -> axum::Router {
     #[cfg(feature="apidoc")]   
     if cfg.api_cfg.host_doc { 
         r = r.nest("/doc",builded_openapi_for_router() );
-        info!("OpenApi doc & swagger is included in routes!")
+        info!("OpenApi doc is included in routes!")
     }
     
     r.with_state(state)
@@ -56,8 +56,10 @@ pub fn builded_openapi_for_router() -> Router<AppState> {
    // let swagger  utoipa_swagger_ui::SwaggerUi::
     
 
-   router = router
-    .route("/schema.yaml", get(|| async{syaml}));
+    router = router
+       .route("/schema.yaml", get(|| async{syaml}));
+    info!("ApiDoc included");
+
     
 
     #[cfg(feature="swagger")]
@@ -65,6 +67,7 @@ pub fn builded_openapi_for_router() -> Router<AppState> {
         ::new("/swagger-ui").url("/doc/schema.yaml", openapi )
         .config(utoipa_swagger_ui::Config
             ::default().default_model_rendering("model")));
+        info!("Swagger included")
     }
     router 
 

@@ -40,15 +40,24 @@ admin is requester - we may want to return
 something better formed.  */
 #[derive(Serialize, ToSchema)]
 pub struct TestListResponse {
-    user_id: Option<i64>, // Contains value if provided not to solver.
-    asigned: Vec<AsignedTestResponse>
+    pub user_id: Option<i64>, // Contains value if provided not to solver.
+    pub asigned: Vec<AsignedTestResponse>
 
 }
 
 #[derive(Deserialize, Serialize , ToSchema)]
 pub struct AsignToReq {
-    how: AsignWay,
-    to: Vec<i64>
+    pub how: AsignWay,
+    pub to: Vec<i64>,
+    pub tries: i64, 
+    pub from: i64, 
+    pub until: i64
+}
+
+#[derive(Deserialize, Serialize, ToSchema)]
+pub struct UnAsignReq{ 
+    pub how: AsignWay, 
+    pub to: Vec<i64>
 }
 
 #[derive(Deserialize, Serialize, ToSchema)]
@@ -71,8 +80,8 @@ pub struct AsignedTestResponse {
 
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct QuestionsAddReq{
-    body: String, 
-    questions: Vec<AnswersPriv>        
+    pub body: String, 
+    pub questions: Vec<AnswersPriv>        
 }
 
 #[derive(Serialize, Deserialize,  ToSchema)]

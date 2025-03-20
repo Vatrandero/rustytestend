@@ -69,7 +69,9 @@ pub mod ktest_solver_handlers {
         responses(
             (status = 200, 
             description = "List test for requested solver. user_id never provided in body", 
-            body = models::dtos::TestListResponse)
+            body = models::dtos::TestListResponse),
+            (status = 401, description = "Not authorized"), 
+            (status = 403, description = "Forbidden")
         ), 
         params(
             ("session" = Uuid, Cookie,
@@ -88,7 +90,7 @@ pub mod ktest_solver_handlers {
     /// providing user data of it.
     #[utoipa::path(
         post, 
-        path = "/solver/test/start/{id}", 
+        path = "/solver/test/{id}/start", 
         responses(
             (status=200, 
             description="Test succesufuly runed, returning",
@@ -105,7 +107,19 @@ pub mod ktest_solver_handlers {
 ) -> Result<Json<models::knowledge_test::KTestOngoing>, StatusCode> {
         Err(StatusCode::NOT_IMPLEMENTED)
     }
-    pub async fn answer_to_test(State(st): State<AppState>, c: CookieJar, 
+    
+    /// Takes updateed KTestOngoin, verifies it and updates internally.
+    #[utoipa::path(
+        post, 
+        path="/solver/ktsession/{id}/update",
+        request_body=models::knowledge_test::KTestOngoing,
+        responses(
+            (status = 200, description = "Ok."),
+            (status = 401, description = "Not autorized."), 
+            (status = 422, description = "Bad data provided.")
+        )
+    )]
+    pub async fn update_test_session(State(st): State<AppState>, c: CookieJar, 
     ) -> StatusCode {
         StatusCode::NOT_IMPLEMENTED
     }
@@ -125,8 +139,8 @@ pub mod ktest_manager_handlers {
         request_body=models::dtos::KTestCreateReq,
         responses( 
             (status = 200, body=i64, description="id of created test"), 
-            (status = 400, description = "Bad test provided" ),
             (status = 401, description= "Not authorized"), 
+            (status = 422, description = "Bad test provided" ),
             (status = 500, description= "Internal server or database failure.")
         ), 
         params( 
@@ -142,6 +156,12 @@ pub mod ktest_manager_handlers {
     #[utoipa::path(
         post, 
         path="/tmngr/{id}/delete_test",
+        responses(
+            (status = 200, description = "Ok" ),
+            (status = 401, description = "Not authorized"),
+            (status = 403, description = "Forbidden"), 
+            (status = 500, description = "Inerrnal error or database error")
+        ),
         params(
             ("session" = Uuid, Cookie, 
         description="User session, extracting user id from it."),
@@ -157,10 +177,11 @@ pub mod ktest_manager_handlers {
         path="/tmngr/{id}/asign/",
         request_body=models::dtos::AsignToReq,
         responses(
-            (status = 200, description="OK, Asigned"), 
-            (status = 400, description="Bad request"),
-            (status = 401, description="Not authorized"),
-            (status = 500, description="Internal error or database error")
+            (status = 200, description = "OK, Asigned"), 
+            (status = 422, description = "Bad data"),
+            (status = 401, description = "Not authorized"),
+            (status = 403, description = "Forbidden"),
+            (status = 500, description = "Internal error or database error")
         ),
         params(
             ("session" = Uuid, Cookie, 
@@ -174,7 +195,16 @@ pub mod ktest_manager_handlers {
     }
     #[utoipa::path(
         post, 
-        path="/tmngr/{id}/unasign"
+        path="/tmngr/{id}/unasign",
+        request_body=models::dtos::UnAsignReq,
+        responses(
+
+        ),
+        params(
+            ("id"=i64, Path, description="Test ID."),
+            ("sessino"=Uuid, Cookie, 
+            description = "User session, extracting user id from it.")
+        )
         
     )]
     pub async fn unasign_test(State(st): State<AppState>, c: CookieJar)
