@@ -1,9 +1,7 @@
 /// REST Api.
-use crate::models::dtos;
 pub(super) mod routes;
 
 use crate::db::{SessionManager, UsersManager};
-use crate::models::users::User;
 use std::sync::Arc;
 use axum::{Router, routing::{get, post, put}};
 use utoipa::OpenApi;

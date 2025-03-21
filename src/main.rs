@@ -92,7 +92,6 @@ fn main() {
         trace!("Reached: async runtime runed");
 
         let api_router = api::init_router(&cfg, state);
-        let mut socketsaddrs: Vec<SocketAddr> = Vec::new();
         let ncfg = &cfg.api_cfg.clone();
         let addr: std::net::SocketAddr = match ncfg.api_addres_and_port.parse() {
             Ok(r) => r,

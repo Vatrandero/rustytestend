@@ -1,5 +1,4 @@
 use super::KnolewdgeTest;
-use chrono::DateTime;
 
 pub struct TestReport {
     test: KnolewdgeTest,

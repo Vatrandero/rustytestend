@@ -1,5 +1,5 @@
 use crate::models::dtos::UserRegisterReq;
-use crate::cfg::db_pg_cfg;
+use crate::cfg::DBPGCfg;
 use crate::models::dtos;
 use crate::models::users::*;
 use crate::models::knowledge_test;
@@ -32,7 +32,7 @@ pub struct DBPostgres {
     pool: Pool<Postgres>,
 }
 impl DBPostgres {
-    pub async fn try_init(cfg: &db_pg_cfg) -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn try_init(cfg: &DBPGCfg) -> Result<Self, Box<dyn std::error::Error>> {
         let mut pgconn_opt = PgConnectOptions::new()
             .application_name("tester_backend")
             .database(&cfg.db_name)

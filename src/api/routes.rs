@@ -1,17 +1,13 @@
-use axum::response::IntoResponse;
-
 pub(super) mod commons {
     pub use super::super::AppState;
     pub use crate::models;
     pub use axum::extract::{State, Query, Path};
     pub use axum::http::{header::SET_COOKIE, StatusCode};
-    pub use axum::response::{AppendHeaders, ErrorResponse, IntoResponse};
-    pub use axum::routing::{get, post, put};
-    pub use axum::{Json, Router};
+    pub use axum::response::{AppendHeaders, IntoResponse};
+    pub use axum::Json;
     pub use axum_extra::extract::CookieJar;
     pub use utoipa;
     pub use uuid::Uuid;
-    pub use utoipa::openapi::OpenApi;
 }
 
 pub mod user_and_sesion_managment {
@@ -36,7 +32,6 @@ pub mod user_and_sesion_managment {
     }
 }
 pub mod admin_handlers {
-    use axum::debug_handler;
 
     use super::commons::*;
 
