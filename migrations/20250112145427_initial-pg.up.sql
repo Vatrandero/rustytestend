@@ -7,7 +7,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TYPE  user_role AS ENUM
-    ('responder', 'test_giver', 'admin');
+    ('admin', 'test_giver', 'solver');
 
 CREATE TABLE IF NOT EXISTS public.answers ( 
     id SERIAL PRIMARY KEY NOT NULL, 
