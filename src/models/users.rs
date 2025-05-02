@@ -1,28 +1,41 @@
 use serde::{Deserialize, Serialize};
-#[derive(Deserialize, Serialize)]
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type,  serde::Deserialize, serde::Serialize)]
+#[sqlx(type_name = "user_role", rename_all = "lowercase")]
+pub enum UserRole {
+    Admin,
+    Solver, 
+    //#[serde(rename="test_giver")]
+    Test_Giver
+}
+
+#[derive(Deserialize, Serialize, sqlx::FromRow)]
 pub struct User {
-    pub id: u64,
+    pub id: i32,
     pub first_name: String,
-    pub seocnd_name: Option<String>,
+    pub second_name: Option<String>,
     pub last_name: Option<String>,
+    pub user_role: UserRole,
     pub login: String,
     pub password_hash: String,
 }
 
 impl User {
     pub fn new(
-        id: u64,
+        id: i32,
         first_name: String,
-        seocnd_name: Option<String>,
+        second_name: Option<String>,
         last_name: Option<String>,
         login: String,
+        user_role:UserRole,
         password_hash: String,
     ) -> Self {
         Self {
             id,
             first_name,
-            seocnd_name,
+            second_name,
             last_name,
+            user_role,
             login,
             password_hash,
         }

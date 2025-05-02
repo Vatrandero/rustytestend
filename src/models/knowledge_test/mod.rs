@@ -32,7 +32,7 @@ pub enum Answers{
     Closed{
         avalable: Vec<String>,
         selected: usize // index, started from 0
-    }, // Avalable, selected,
+    }, // Avalable, selected.
     Open(String)
 }
 /// For internal only use.
@@ -71,6 +71,7 @@ pub struct KtAsigment {
     pub close_after_time_stamp: i64 
 }
 
+#[derive(Deserialize, Serialize, ToSchema)]
 pub struct KTestOngoingPriv {
     sesion_id: u64,
     test: KnolewdgeTest,    // TODO: Consider using Rc<>.
@@ -79,11 +80,11 @@ pub struct KTestOngoingPriv {
     user_id: u64,
     session_start_time: i64,
 }
-#[derive(ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct KTestOngoing { 
     session_id: i64,
     test_id: i64,
-    queestions: Vec<String>
+    queestions: Vec<Question>
     
 }
 
