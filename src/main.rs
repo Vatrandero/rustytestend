@@ -81,7 +81,7 @@ fn main() {
 
     // Builded, ready to go
     rt.block_on(async {
-        let db = Arc::new((db::DBPostgres::try_init(&cfg.db_cfg.get_pg().unwrap()).await).unwrap());
+        let db = Arc::new((db::pgsql::DBPostgres::try_init(&cfg.db_cfg.get_pg().unwrap()).await).unwrap());
         let state = api::AppState {
             dbpool_user_manager: db.clone(),
             // As long as we use the same driver for anything....
