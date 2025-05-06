@@ -1,7 +1,13 @@
+[general_cfg]
+runtime_thrads = 3
+bactrace_panic_logs = false
+
 [db_cfg.Postgresql]
 host = "localhost"
 port = 5432
-db_name = "testing_system"
+db_name = "Testing_system"
+username = "postgres"
+password = ""
 use_tls = false
 
 [api_cfg]

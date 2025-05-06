@@ -6,10 +6,7 @@ use axum::routing::trace;
 use cfg::DbCfg;
 use clap::Parser;
 use std::{
-    io::{Read, Write},
-    net::{IpAddr, SocketAddr},
-    path::PathBuf,
-    sync::Arc,
+    fs::File, io::{Read, Write}, net::{IpAddr, SocketAddr}, path::PathBuf, sync::Arc
 };
 
 use tokio::runtime::{Builder, Runtime};
@@ -21,9 +18,10 @@ extern crate log;
 #[derive(Parser)]
 struct Args {
     #[arg(short, long, value_name = "FILE")]
-    pub gen_config: Option<PathBuf>, // Actualy, it only prints it now.
+    pub gen_config: Option<PathBuf>, //FIXME: Actualy, only prints it now.
 
     #[arg(short, long, value_name = "FILE")]
+    
     pub config: Option<PathBuf>,
 }
 
@@ -31,8 +29,13 @@ fn main() {
     let args = Args::parse();
     // Should we generate default config?
     if let Some(p) = args.gen_config {
+        println!("Default config will be generated into {}", p.clone().to_str().unwrap());
         let default_config = toml::to_string(&cfg::Config::default()).unwrap();
-        print!("{}", default_config);
+        let mut f = match  File::create_new(p) { 
+            Ok(ncfgf) =>  ncfgf,
+            Err(e) => {panic!("Bad path or file for new conffig. {}", e)}
+        };
+        f.write_all(default_config.as_bytes()).unwrap();
         return;
     }
     // Early debug logging.
@@ -46,6 +49,7 @@ fn main() {
     // TODO: OR: init with env.
 
     trace!("Logger initialized, trace.");
+
 
     // Can we load config?
     let cfg_path = match args.config {
@@ -70,25 +74,46 @@ fn main() {
         }
     };
 
-    // let's build our router
+    // let's install log-panics hook.
+    let is_backtrace = std::env::var("RUST_BACKTRACE")
+    .unwrap_or_else(|_|   {"false".to_string()});
+    log_panics::Config::new()
+    .backtrace_mode(
+        if is_backtrace.eq_ignore_ascii_case("true") || is_backtrace == "1" 
+        {log_panics::BacktraceMode::Resolved}
+        else{log_panics::BacktraceMode::Off}
+    ).install_panic_hook();
 
     // Okay, we ready to start runtime and connections.
+    
+    // If we debuggine - single-thread is eaasier to debug.
+    #[cfg(debug_assertions)]
+    let rt = tokio::runtime::Builder::new_current_thread()
+    .enable_all()
+    .build()
+    .unwrap();
+   #[cfg(debug_assertions)]
+    debug!("Tokio-runtime launched single-thread for debug purpose");
+
+    #[cfg(not(debug_assertions))]
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
-        .worker_threads(3)
+        .worker_threads(cfg.general_cfg.runtime_thrads.try_into().
+        unwrap_or_else(|_|
+             {error!("Can't use threads from cfg. using 3 as default."); 3 as usize}))
         .build()
         .unwrap();
-
     // Builded, ready to go
     rt.block_on(async {
-        let db = Arc::new((db::pgsql::DBPostgres::try_init(&cfg.db_cfg.get_pg().unwrap()).await).unwrap());
+        let db = Arc::new(
+            (db::pgsql::DBPostgres::try_init(&cfg.db_cfg.get_pg().unwrap()).await)
+            .unwrap());
         let state = api::AppState {
             dbpool_user_manager: db.clone(),
             // As long as we use the same driver for anything....
             // We just clone our Arc.
             dbpool_session_manager: db.clone(),
         };
-
         trace!("Reached: async runtime runed");
 
         let api_router = api::init_router(&cfg, state);

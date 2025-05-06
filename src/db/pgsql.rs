@@ -16,7 +16,8 @@ impl DBPostgres {
         let mut pgconn_opt = PgConnectOptions::new()
             .application_name("tester_backend")
             .database(&cfg.db_name)
-            .username("postgres")
+            .username(&cfg.username)
+            .password(&cfg.password)
             .host(&cfg.host)
             .port(if let Some(portf) = cfg.port {
                 portf // Port was provided in config
