@@ -1,7 +1,8 @@
 /// REST Api.
 pub(super) mod routes;
-
-use crate::db::{SessionManager, UsersManager};
+pub mod error;
+use error::ApiError;
+use crate::db::{UsersSessionManager, UsersManager};
 use std::sync::Arc;
 use axum::{Router, routing::{get, post, put}};
 use utoipa::OpenApi;
@@ -19,7 +20,7 @@ pub struct Apidoc;
 #[derive(Clone)]
 pub struct AppState {
     pub dbpool_user_manager: Arc<dyn UsersManager + Send + Sync>,
-    pub dbpool_session_manager: Arc<dyn SessionManager + Send + Sync>,
+    pub dbpool_session_manager: Arc<dyn UsersSessionManager + Send + Sync>,
     /* Why using dyn?
     In future, there considired multi-db mode or
     db+cache (like redis) modes.
@@ -28,6 +29,42 @@ pub struct AppState {
     This text shall be removed when feature will
     be implemented.
      */
+}
+
+impl AppState { 
+    /// Checks if user existed for given session id.
+    /// Return None if no `session` cookie found.
+    /// Returns `Err(ApiErrorr::BadAuthData) if session expired, fake or by other
+    /// reason is not retrned by `UseSessionManager``
+    pub async fn check_auth(&self, cookie: axum_extra::extract::CookieJar)
+    -> Result<Option<i32>, ApiError> { 
+        
+        let session = match cookie.get("session") { 
+            Some(s) => {
+                let s = s.to_string();
+                match uuid::Uuid::parse_str(&s) {
+                    Ok(u) => u, 
+                    Err(e) => {
+                        debug!("bad session-uuid {e}");
+                        return Err(ApiError::BadAuthData);
+                    }
+                }
+
+            }, 
+            None => {return Ok(None) }
+        };        
+        let usm = self.dbpool_session_manager.clone();
+        match usm.resolve_user_session_to_id(session).await {
+            Ok(i) => match i { Some(o) => return Ok(Some(o)), None => return Err(ApiError::BadAuthData) } ,
+            Err(e) =>  {
+                 warn!("Failed to check use-session, db error? {e}");
+                 return  Err(ApiError::InternalError(e));
+                }
+        }
+
+        
+        todo!()
+    }
 }
 
 /// Based on passed configs 
@@ -56,7 +93,7 @@ pub fn builded_openapi_for_router() -> Router<AppState> {
 
     router = router
        .route("/schema.yaml", get(|| async{syaml}));
-    info!("ApiDoc included");
+    info!("ApiDoc included, see /doc/schema.yaml");
 
     
 
@@ -65,7 +102,7 @@ pub fn builded_openapi_for_router() -> Router<AppState> {
         ::new("/swagger-ui").url("/doc/schema.yaml", openapi )
         .config(utoipa_swagger_ui::Config
             ::default().default_model_rendering("model")));
-        info!("Swagger included")
+        info!("Swagger included at /doc/swagger-ui/")
     }
     router 
 

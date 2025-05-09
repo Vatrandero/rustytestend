@@ -1,6 +1,6 @@
 [package]
 name = "rustytestend"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Vadim Palatov <vatrandero@gmail.com>"]
 license = "MPL-2.0"
 edition = "2021"

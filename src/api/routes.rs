@@ -9,7 +9,8 @@ pub(super) mod commons {
     pub use utoipa;
     pub use uuid::Uuid;
 }
-
+/// Handlers responsible for user managment and login.
+/// rudemintal.
 pub mod user_and_sesion_managment {
 
     use super::commons::*;
@@ -31,6 +32,8 @@ pub mod user_and_sesion_managment {
         StatusCode::NOT_IMPLEMENTED
     }
 }
+
+/// Admin handlers. 
 pub mod admin_handlers {
 
     use super::commons::*;
