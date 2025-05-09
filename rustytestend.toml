@@ -5,7 +5,7 @@ bactrace_panic_logs = false
 [db_cfg.Postgresql]
 host = "localhost"
 port = 5432
-db_name = "Testing_system"
+db_name = "testing_system"
 username = "postgres"
 password = ""
 use_tls = false

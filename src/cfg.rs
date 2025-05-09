@@ -48,7 +48,7 @@ impl Default for Config {
         };      
         let db_pg = DbCfg::Postgresql(DBPGCfg {
             host: String::from("localhost"),
-            db_name: String::from("Testing_system"),
+            db_name: String::from("testing_system"),
             username: String::from("postgres"),
             password: String::from(""),
             port: Some(5432),
