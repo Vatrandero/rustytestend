@@ -6,6 +6,7 @@
 DROP TABLE answers CASCADE;
 DROP TABLE questions CASCADE;  
 DROP TABLE user_sessions CASCADE;
+DROP TABLE tests_open_questions_matches;
 DROP TABLE test_asignments CASCADE;
 DROP TABLE tests_journal CASCADE;
 DROP TABLE test_sessions CASCADE;

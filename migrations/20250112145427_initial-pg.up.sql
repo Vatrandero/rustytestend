@@ -60,12 +60,22 @@ CREATE TABLE IF NOT EXISTS public.tests_journal
     id serial NOT NULL,
     test_id integer NOT NULL,
     user_id integer NOT NULL,
-    locked BOOLEAN NOT NULL DEFAULT FALSE,
+    locked BOOLEAN NOT NULL DEFAULT FALSE, 
+    has_closed_questions BOOLEAN NOT NULL,
+    needs_to_review_closed_questions BOOLEAN NOT NULL DEFAULT FALSE,
     test_user_session_started timestamp without time zone NOT NULL,
     test_user_session_ended timestamp without time zone NOT NULL,
     duration_taken_secs interval GENERATED ALWAYS AS ((test_user_session_ended - test_user_session_started)) STORED,
 
     CONSTRAINT tests_journal_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS tests_open_questions_matches 
+(
+    test_journal_id INT NOT NULL, 
+    is_aprooved BOOLEAN,
+    FOREIGN KEY (test_journal_id) REFERENCES tests_journal(id)
+
 );
 
 CREATE TABLE IF NOT EXISTS public.users
