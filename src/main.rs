@@ -8,7 +8,6 @@ use clap::Parser;
 use std::{
     fs::File, io::{Read, Write}, net::{IpAddr, SocketAddr}, path::PathBuf, sync::Arc
 };
-
 use tokio::runtime::{Builder, Runtime};
 
 extern crate env_logger;
@@ -109,10 +108,13 @@ fn main() {
             (db::pgsql::DBPostgres::try_init(&cfg.db_cfg.get_pg().unwrap()).await)
             .unwrap());
         let state = api::AppState {
-            dbpool_user_manager: db.clone(),
-            // As long as we use the same driver for anything....
-            // We just clone our Arc.
-            dbpool_session_manager: db.clone(),
+            user_manager: db.clone(),
+            // As long as all managers use the same underlying driver,
+            // we can safely clone the Arc for shared access.
+            user_session_manager: db.clone(),
+            ktest_manager: db.clone(),
+            ktest_session_manager: db.clone()
+            // TODO: Replace with flixible and extenisable builder.
         };
         trace!("Reached: async runtime runed");
 

@@ -2,7 +2,7 @@
 pub(super) mod routes;
 pub mod error;
 use error::ApiError;
-use crate::db::{UsersSessionManager, UsersManager};
+use crate::db::{KTestManager, KTestSessionManager, UsersManager, UsersSessionManager};
 use std::sync::Arc;
 use axum::{Router, routing::{get, post, put}};
 use utoipa::OpenApi;
@@ -19,8 +19,10 @@ pub struct Apidoc;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub dbpool_user_manager: Arc<dyn UsersManager + Send + Sync>,
-    pub dbpool_session_manager: Arc<dyn UsersSessionManager + Send + Sync>,
+    pub user_manager: Arc<dyn UsersManager + Send + Sync>,
+    pub user_session_manager: Arc<dyn UsersSessionManager + Send + Sync>,
+    pub ktest_manager: Arc<dyn KTestManager + Send + Sync>, 
+    pub ktest_session_manager: Arc<dyn KTestSessionManager + Senc + Sync>
     /* Why using dyn?
     In future, there considired multi-db mode or
     db+cache (like redis) modes.
@@ -53,7 +55,7 @@ impl AppState {
             }, 
             None => {return Ok(None) }
         };        
-        let usm = self.dbpool_session_manager.clone();
+        let usm = self.user_session_manager.clone();
         match usm.resolve_user_session_to_id(session).await {
             Ok(i) => match i { Some(o) => return Ok(Some(o)), None => return Err(ApiError::BadAuthData) } ,
             Err(e) =>  {
@@ -63,7 +65,6 @@ impl AppState {
         }
 
         
-        todo!()
     }
 }
 
