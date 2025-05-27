@@ -144,3 +144,87 @@ impl UsersSessionManager for DBPostgres {
         Ok(())        
     }
 }
+#[async_trait]
+impl KTestManager for DBPostgres { 
+    async fn create_new(&self) -> Result<(), DBError>
+    {   
+
+        todo!()
+    }
+    async fn list_tests_meta_last_n(&self, n:i32) 
+    -> Result<Vec<models::knowledge_test::KnowledgeTestMeta>, DBError> {
+        todo!()
+    }
+    async fn list_simple_by_search_text(&self, text: &str)
+    -> Result<Vec<models::knowledge_test::KnowledgeTestMeta>, DBError> { 
+        todo!()
+
+    }
+      async fn select_test_by_id(&self, id: i32) 
+    -> Result<models::knowledge_test::KnolewdgeTestPriv, DBError> 
+    {
+        todo!()
+    }
+      async fn select_test_priv_by_id(&self, id: i32) 
+    -> Result<models::knowledge_test::KnolewdgeTestPriv, DBError> 
+    {
+        todo!()
+    }
+      async fn select_test_meta_by_id(&self, id: i32) 
+    -> Result<models::knowledge_test::KnowledgeTestMeta, DBError> { 
+        todo!()
+    } 
+
+
+    async fn delete(&self, test_id: i64) -> Result<(), DBError >
+    {
+        todo!()
+    }
+
+    async fn asign(&self, asign: models::dtos::UnAsignReq) {
+        todo!()
+    }
+    async fn get_asign_by_id(
+        &self,
+        user_id: i64,
+        test_id: i64,
+    ) -> Result<models::knowledge_test::KtAsigment, Box<dyn Error>> { 
+        todo!()
+    }
+    /// this method needs to be called when starting new KtESTsESSION.
+    /// decrease tries for given asigment in DB
+    async fn decrease_asignment(&self, asign: models::knowledge_test::KtAsigment)
+    {
+        todo!()
+    }
+    async fn unasign(&self, unasign: models::dtos::UnAsignReq)
+    -> Result<(), DBError> { 
+        todo!()
+    }
+} 
+
+
+#[async_trait]
+impl KTestSessionManager for DBPostgres {
+    async fn new(
+        &self,
+        asign: models::knowledge_test::KtAsigment,
+    ) -> Result<models::knowledge_test::KTestOngoing, Box<dyn Error>> 
+    {
+        todo!()
+    }
+    async fn cancel(&self) { 
+        todo!()
+    }
+    
+    async fn update(&self, ko: models::knowledge_test::KTestOngoing) -> Result<(), Box<dyn Error>> 
+    {
+        todo!()
+    }
+        async fn end_session(&self, id: i64) -> Result<(), Box<dyn Error>> 
+        {
+            todo!()
+        }
+
+
+}

@@ -35,9 +35,9 @@ pub struct UserModReq{
 }
 
 /*  Maybe this one should be used for admin only in admin forms?
-Axim gives ability to return  Json<Vec<T>>, but when 
+Axum gives ability to return  Json<Vec<T>>, but when 
 admin is requester - we may want to return 
-something better formed.  */
+something better formed, this iwhy this struct here  */
 #[derive(Serialize, ToSchema)]
 pub struct TestListResponse {
     pub user_id: Option<i64>, // Contains value if provided not to solver.
@@ -90,7 +90,7 @@ pub struct KTestCreateReq{
     pub description: String, 
     pub max_duration_seconds: i64, 
     pub minimum_pass_score: u8, 
-    pub questions: Vec<QuestionPriv>        
+    pub questions: Vec<QuestionPriv>
 
 }
 

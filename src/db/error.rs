@@ -1,5 +1,4 @@
 use std::error::Error;
-
 #[derive(Debug)]
 pub enum DBError {
     RegisterSameUser(String),

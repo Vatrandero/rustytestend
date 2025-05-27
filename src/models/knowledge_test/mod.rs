@@ -1,5 +1,13 @@
 pub mod report;
 
+/* Suffix explained:
+    [no]: Contains no sensetive data.
+    Priv: Contain sensetive data, cannot be sent to some users
+    Meta: Lighyweld description of object, do not contains 
+        inner data.
+    
+     */
+
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 /// internal use only
@@ -53,14 +61,34 @@ impl AnswersPriv {
 }
 /// This structure describes a ready-to-go test kit.
 /// When new session runs - it creates based on this struct instance.
-#[derive(Deserialize, Serialize,  ToSchema)]
-pub struct KnolewdgeTest {
-    pub id: u64,
+
+#[derive(Deserialize, Serialize, ToSchema)]
+pub struct KnolewdgeTest { 
+    pub id: i32,
     pub title: String,
-    pub description: Option<String>,
+    pub description: String,
+    pub max_duration_seconds: i64, // TODO:  consider change to chrono::Datetime
+    pub minimum_pass_score: u8,
+    pub questions: Vec<Question>,
+}
+#[derive(Deserialize, Serialize,  ToSchema)]
+pub struct KnolewdgeTestPriv {
+    pub id: i32,
+    pub title: String,
+    pub description: String,
     pub max_duration_seconds: i64, // TODO:  consider change to chrono::Datetime
     pub minimum_pass_score: u8,
     pub questions: Vec<QuestionPriv>,
+}
+
+pub struct KnowledgeTestMeta {
+    pub id: i32, 
+    pub title: String,  
+    pub description: String, 
+    pub max_duraton: i64, 
+    pub minimum_pass_score: u8, 
+    pub question_count: i32,
+
 }
 
 // NOTE: Too short life, prototype.
@@ -74,7 +102,7 @@ pub struct KtAsigment {
 #[derive(Deserialize, Serialize, ToSchema)]
 pub struct KTestOngoingPriv {
     sesion_id: u64,
-    test: KnolewdgeTest,    // TODO: Consider using Rc<>.
+    test: KnolewdgeTestPriv,    // TODO: Consider using Rc<>.
                             // Considered: Realize after later as cache.
     ansered_questions: Vec<(QuestionPriv, String)>,
     user_id: u64,
@@ -87,9 +115,9 @@ pub struct KTestOngoing {
     queestions: Vec<Question>
     
 }
-
+ 
 pub struct KtestResult {
-    test: KnolewdgeTest,
+    test: KnolewdgeTestPriv,
     kt_session_started: i64,
     kt_session_ended: i64,
 }

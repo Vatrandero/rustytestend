@@ -13,6 +13,7 @@ pub use tokio::stream::*;
 pub use uuid::Uuid;
 }
 use commons::*;
+use error::DBError;
 pub mod pgsql;
 
 /*
@@ -44,12 +45,32 @@ pub trait UsersSessionManager {
 
 #[async_trait]
 pub trait KTestManager {
-    async fn nwe(&self);
-    async fn list(&self, id: i64);
-    async fn delete(&self, test_id: i64);
+    /// creates new tet on database side.
+    async fn create_new(&self) -> Result<(), DBError>;
+
+    // List and search
+
+
+    async fn list_tests_meta_last_n(&self, n: i32)
+    -> Result<Vec<models::knowledge_test::KnowledgeTestMeta>, DBError>  ;
+
+    async fn list_simple_by_search_text(&self, text: &str)
+    -> Result<Vec<models::knowledge_test::KnowledgeTestMeta>, DBError>;
+    
+    async fn select_test_by_id(&self, id: i32) 
+    -> Result<models::knowledge_test::KnolewdgeTestPriv, DBError>; 
+
+      async fn select_test_priv_by_id(&self, id: i32) 
+    -> Result<models::knowledge_test::KnolewdgeTestPriv, DBError>; 
+    
+      async fn select_test_meta_by_id(&self, id: i32) 
+    -> Result<models::knowledge_test::KnowledgeTestMeta, DBError>; 
+
+
+    async fn delete(&self, test_id: i64) -> Result<(), DBError >;
 
     async fn asign(&self, asign: models::dtos::UnAsignReq);
-    async fn get_asign_by_ids(
+    async fn get_asign_by_id(
         &self,
         user_id: i64,
         test_id: i64,
@@ -59,7 +80,8 @@ pub trait KTestManager {
     /// decrease tries for given asigment in DB
     async fn decrease_asignment(&self, asign: models::knowledge_test::KtAsigment);
 
-    async fn unasign(&self, unasign: models::dtos::UnAsignReq);
+    async fn unasign(&self, unasign: models::dtos::UnAsignReq)
+    -> Result<(), DBError>;
 }
 #[async_trait]
 pub trait KTestSessionManager {
@@ -106,4 +128,3 @@ pub trait KTestSessionManager {
     /// Succusuflly end sesion.
     async fn end_session(&self, id: i64) -> Result<(), Box<dyn Error>>;
 }
-
