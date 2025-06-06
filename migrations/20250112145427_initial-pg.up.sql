@@ -12,10 +12,22 @@ CREATE TYPE  user_role AS ENUM
 CREATE TABLE IF NOT EXISTS public.answers ( 
     id SERIAL PRIMARY KEY NOT NULL, 
     question_id INTEGER, 
-    anseer_text TEXT, 
+    answer_text TEXT, 
     is_correct BOOLEAN
 );
 
+CREATE TABLE IF NOT EXISTS public.tests_open_questions_states 
+(
+    test_journal_record_id INT NOT NULL,
+    test_session_question_id INT NOT NULL,
+    -- Need to check?
+    is_inserted BOOLEAN NOT NULL,
+    -- Checked?
+    is_reviewed BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Aprooved (e.q count as answered and count as)
+    is_aprooved BOOLEAN
+
+);
 CREATE TABLE IF NOT EXISTS public.questions ( 
     id SERIAL NOT NULL PRIMARY KEY, 
     title VARCHAR(64),
@@ -42,11 +54,12 @@ CREATE TABLE IF NOT EXISTS public.tests
     CONSTRAINT tests_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.test_sessions ( 
+CREATE TABLE IF NOT EXISTS public.test_session_answered_rels ( 
     journal_record_id INTEGER NOT NULL, 
     question_id INTEGER NOT NULL, 
     selected_answer_id INTEGER, 
     arbitrary_answer TEXT, 
+	UNIQUE (journal_record_id, question_id),
     CONSTRAINT chk_selected_xor_arbitrary_answer 
         CHECK (
             (selected_answer_id IS NULL AND arbitrary_answer IS NULL) -- not answered yet.
@@ -61,22 +74,16 @@ CREATE TABLE IF NOT EXISTS public.tests_journal
     test_id integer NOT NULL,
     user_id integer NOT NULL,
     locked BOOLEAN NOT NULL DEFAULT FALSE, 
-    has_closed_questions BOOLEAN NOT NULL,
-    needs_to_review_closed_questions BOOLEAN NOT NULL DEFAULT FALSE,
+    open_questions_count INT NOT NULL,
+    needs_to_review_open_questions_count INT NOT NULL,
     test_user_session_started timestamp without time zone NOT NULL,
-    test_user_session_ended timestamp without time zone NOT NULL,
+    test_user_session_ended timestamp without time zone NULL, --BULL: May be not yet done.
     duration_taken_secs interval GENERATED ALWAYS AS ((test_user_session_ended - test_user_session_started)) STORED,
 
     CONSTRAINT tests_journal_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS tests_open_questions_matches 
-(
-    test_journal_id INT NOT NULL, 
-    is_aprooved BOOLEAN,
-    FOREIGN KEY (test_journal_id) REFERENCES tests_journal(id)
 
-);
 
 CREATE TABLE IF NOT EXISTS public.users
 (
@@ -105,18 +112,25 @@ CREATE TABLE IF NOT EXISTS public.user_sessions
 COMMENT ON COLUMN public.user_sessions.sid
     IS 'Consider as auth token itself.';
 
-ALTER TABLE IF EXISTS answers 
+ALTER TABLE IF EXISTS public.answers 
     ADD CONSTRAINT answers_question_id_fkey FOREIGN KEY (question_id)
     REFERENCES public.questions(id)
     ON UPDATE NO ACTION
     ON DELETE CASCADE;
 
-ALTER TABLE IF EXISTS public.test_sessions 
-    ADD CONSTRAINT test_sessions_tests_journal_fkey FOREIGN KEY (journal_record_id) 
+ALTER TABLE public.tests_open_questions_states   
+    ADD CONSTRAINT tests_open_questions_states_tests_journal_fkey 
+        FOREIGN KEY (test_journal_record_id, test_session_question_id)
+        REFERENCES public.test_session_answered_rels
+		(journal_record_id, question_id ) 
+        ;
+
+ALTER TABLE IF EXISTS public.test_session_answered_rels 
+    ADD CONSTRAINT test_session_answered_rels_tests_journal_fkey FOREIGN KEY (journal_record_id) 
         REFERENCES public.tests_journal(id),
-    ADD CONSTRAINT test_sessions_question_id_fkey FOREIGN KEY (question_id)
+    ADD CONSTRAINT test_session_answered_rels_question_id_fkey FOREIGN KEY (question_id)
         REFERENCES public.questions(id),
-    ADD CONSTRAINT test_sessions_selected_answer_id FOREIGN KEY (selected_answer_id)
+    ADD CONSTRAINT test_session_answered_rels_selected_answer_id_fkey FOREIGN KEY (selected_answer_id)
         REFERENCES public.answers(id);
 
 
