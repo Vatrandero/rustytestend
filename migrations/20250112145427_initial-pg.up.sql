@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS public.tests_open_questions_states
 );
 CREATE TABLE IF NOT EXISTS public.questions ( 
     id SERIAL NOT NULL PRIMARY KEY, 
-    title VARCHAR(64),
     question_text TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS public.test_asignments
@@ -46,12 +45,17 @@ CREATE TABLE IF NOT EXISTS public.test_asignments
 CREATE TABLE IF NOT EXISTS public.tests
 (
     id serial NOT NULL,
-    tille character varying(128) NOT NULL,
-    descripion text,
+    title character varying(128) NOT NULL,
+    description text,
     duration integer NOT NULL,
-    pass_score integer NOT NULL,
+    pass_score smallint NOT NULL,
     created_at timestamp without time zone NOT NULL,
     CONSTRAINT tests_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE tests_questions_pool ( 
+    test_id INTEGER NOT NULL, 
+    question_id INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS public.test_session_answered_rels ( 
@@ -140,6 +144,14 @@ ALTER TABLE IF EXISTS public.user_sessions -- auTH user_session
     ON UPDATE NO ACTION
     ON DELETE NO ACTION;
 
+
+ALTER TABLE IF EXISTS public.tests_questions_pool
+    ADD CONSTRAINT test_questions_pool_test_fkey FOREIGN KEY (test_id)
+    REFERENCES public.tests(id)
+    ON UPDATE NO ACTION,
+    ADD CONSTRAINT test_question_pool_question_fkey FOREIGN KEY (question_id)
+    REFERENCES questions(id)
+    ON UPDATE NO ACTION;
 
 ALTER TABLE IF  EXISTS public.test_asignments
     ADD CONSTRAINT test_asignments_test_id_fkey FOREIGN KEY (test_id)

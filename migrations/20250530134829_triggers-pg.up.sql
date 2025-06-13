@@ -65,4 +65,4 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_set_test_journal_end_time_on_lock
 BEFORE UPDATE ON tests_journal 
 FOR EACH ROW 
-EXECUTE FUNTCION set_test_journal_end_time_on_lock();
+EXECUTE FUNCTION set_test_journal_end_time_on_lock();
