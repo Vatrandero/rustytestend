@@ -62,7 +62,7 @@ pub struct UnAsignReq{
 
 #[derive(Deserialize, Serialize, ToSchema)]
 pub enum AsignWay {
-    Grouo,
+    Group,
     Individual
 }
 
@@ -82,6 +82,12 @@ pub struct AsignedTestResponse {
 pub struct QuestionsAddReq{
     pub body: String, 
     pub questions: Vec<AnswersPriv>        
+}
+#[derive(Debug, Deserialize, Serialize,ToSchema)]
+pub struct KTestSearchReq {
+    in_title: Option<String>,
+    in_description: Option<String>,
+    in_datetimeperied: Option<String>
 }
 
 #[derive(Serialize, Deserialize,  ToSchema)]

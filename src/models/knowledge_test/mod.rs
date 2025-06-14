@@ -24,17 +24,12 @@ pub struct Question {
 
 #[derive(Deserialize, Serialize, ToSchema ,Hash)]
 pub struct QuestionPriv {
-    pub id: u64,
+    pub id: Option<i32>, // If none - it means we inputing object into DB.
     pub question_body: String,
-    pub answers: Vec<AnswersPriv>,
+    pub answers: AnswersPriv,
 }
 
-impl QuestionPriv {
-    pub fn new(id: u64,  question_body: String, answers: Vec<AnswersPriv>) -> Self {
-        Self { id,  question_body, answers }
-    }
 
-}
 #[derive(Serialize, Deserialize, ToSchema)]
 pub enum Answers{
     Closed{
@@ -47,7 +42,7 @@ pub enum Answers{
 #[derive(Deserialize, Serialize, ToSchema, Hash )]
 pub enum AnswersPriv {
     Closed{
-        given: Vec<String>, // contains answers wich may be selected by user..
+        available: Vec<String>, // contains answers wich may be selected by user..
         correct: Vec<usize>,  // contain: Answers, indexes of rigt answer
     },
     Open, // answers did not stored as test part, operator need to check answer manualy.
@@ -80,7 +75,7 @@ pub struct KnolewdgeTestPriv {
     pub minimum_pass_score: u8,
     pub questions: Vec<QuestionPriv>,
 }
-
+#[derive(Clone, Deserialize, Serialize, ToSchema)]
 pub struct KnowledgeTestMeta {
     pub id: i32, 
     pub title: String,  
@@ -116,8 +111,19 @@ pub struct KTestOngoing {
     
 }
  
-pub struct KtestResult {
-    test: KnolewdgeTestPriv,
-    kt_session_started: i64,
-    kt_session_ended: i64,
+#[derive(Deserialize, Serialize, ToSchema)]
+pub struct KTestResultWithTestPrivMeta {
+    pub test: KnolewdgeTestPriv,
+    pub kt_session_started_unix_secs: i64,
+    pub kt_session_ended_unix_secs: i64,
+    pub score_gained: i32
+}
+
+#[derive(Deserialize, Serialize, ToSchema)]
+pub struct KTestResultMeta { 
+    test_title: String,
+    kt_session_started_unix_secs: i32,
+    kt_session_ended_unix_secs: i32,
+    score_gained: i32
+
 }
