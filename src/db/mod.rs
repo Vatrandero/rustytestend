@@ -3,7 +3,7 @@ pub(super) mod commons{
 pub use crate::cfg::DBPGCfg;
 pub use crate::models;
 pub use crate::models::dtos;
-pub use crate::models::dtos::UserRegisterReq;
+pub use crate::models::dtos::*;
 pub use crate::models::users::*;
 pub use async_trait::async_trait; // make traits with async dyn-compatable.
 pub use passhash::hash_password;
@@ -12,7 +12,7 @@ pub use std::error::Error;
 pub use tokio::stream::*;
 pub use uuid::Uuid;
 }
-use commons::*;
+use commons::{dtos::{KTestResultWithTestPrivMeta, KnolewdgeTest, KnolewdgeTestPriv}, *};
 use error::DBError;
 pub mod pgsql;
 
@@ -46,7 +46,7 @@ pub trait UsersSessionManager {
 #[async_trait]
 pub trait KTestManager {
     /// creates new tet on database side.
-    async fn create_new(&self) -> Result<(), DBError>;
+    async fn create_new(&self, test: KnolewdgeTestPriv) -> Result<(), DBError>;
 
     // List and search
 
@@ -82,6 +82,10 @@ pub trait KTestManager {
 
     async fn unasign(&self, unasign: models::dtos::UnAsignReq)
     -> Result<(), DBError>;
+
+    async fn get_ktest_session_result_with_test_priv_meta(&self, test_session_id: i32)
+     -> Result<KTestResultWithTestPrivMeta, DBError>;
+
 }
 #[async_trait]
 pub trait KTestSessionManager {

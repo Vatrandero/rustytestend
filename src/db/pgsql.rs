@@ -1,8 +1,7 @@
 use super::commons::*;
 use super::*;
 use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
-    query, query_as, Error as PGSQLError, PgPool, Pool, Postgres,
+    postgres::{PgConnectOptions, PgPoolOptions}, query, query_as, query_scalar, Error as PGSQLError, PgPool, Pool, Postgres
 };
 
 pub struct DBPostgres {
@@ -149,14 +148,86 @@ impl UsersSessionManager for DBPostgres {
 }
 #[async_trait]
 impl KTestManager for DBPostgres {
-    async fn create_new(&self) -> Result<(), DBError> {
-        todo!()
+    async fn create_new(&self, test: KnolewdgeTestPriv) -> Result<(), DBError> {
+        let mut exe = self.pool.begin().await?;
+        // Test object should be already validated on API side.
+        // Let's assume object is valid.
+
+        'questloop: for i in &test.questions{ 
+        // Insert question, get generated  id
+        let qid = query_scalar!(r#"INSERT INTO questions (question_text)
+        VALUES ($1) RETURNING id"#,  i.question_body).fetch_one(&mut *exe).await?;
+        
+        // can we insert closed answers?
+        match &i.answers {
+            AnswersPriv::Closed { available, correct } => {
+                'asnswerloop: for (j, el) in available.iter().enumerate() {
+                    // If current position is not in correct vector
+                    // It means answe is not correct.    
+                    let is_correct = correct.contains(&j);
+
+                    let q = query!(r#"INSERT INTO answers (question_id, answer_text, is_correct)
+                    VALUES ($1, $2, $3) "#, qid, el, is_correct ).execute(&mut *exe).await?;
+                }
+                // Loop scuess - continue
+            }
+
+            AnswersPriv::Open => continue // can not do anyting.
+        };
+
+
+
+        }
+        // Seems like we done.
+        // Try to commit
+        exe.commit().await?;
+        Ok(())
+
     }
+
+
+    // FIXME: Realy broken piece of code.
     async fn list_tests_meta_last_n(
         &self,
         n: i32,
     ) -> Result<Vec<models::knowledge_test::KnowledgeTestMeta>, DBError> {
-        todo!()
+        let mut exe = self.pool.acquire().await?;
+        let v: Vec<KnowledgeTestMeta>;
+        let r: Vec<Result<KnowledgeTestMeta, DBError>> = query!(r#"SELECT t.id, t.title, t.description, t.duration AS max_duration,
+          t.pass_score AS minimum_pass_score, COUNT(q.question_id) 
+          FROM tests t
+          LEFT JOIN tests_questions_pool q ON q.test_id = t.id 
+          GROUP BY t.id
+          ORDER BY t.id DESC
+          LIMIT $1;"#, n as i64).fetch_all(&mut *exe).await?
+          .iter().map(|o| -> Result<KnowledgeTestMeta, DBError> {
+            if !(0..=100).contains(&o.minimum_pass_score) {
+                error!("Get from dataabase minimun_pass_score our of vaild range:
+                0    >= <= 100.");
+                return Err( DBError::DBDataError
+                (format!("t.id={}, minimum_pass_score={} != < 0 or > 100 ",
+                o.id, o.minimum_pass_score)))
+            } else { Ok(
+            KnowledgeTestMeta{
+            id: o.id,
+            title: o.title.to_string(),
+            description: match o.description.clone()
+                {
+                    Some(str) => str,
+                    None => "".to_string()
+                 },
+            minimum_pass_score: u8::try_from(o.minimum_pass_score).unwrap(),            
+            max_duraton: o.max_duration as i64,
+            question_count: o.minimum_pass_score
+          })}}).collect();
+          if let Some (er) = r.iter().find_map(|o| o.as_ref().err() ){
+            return Err(DBError::DBDataError(er.to_string()));
+          }
+          else {
+             v = r.iter().map(|o| o.as_ref().unwrap().to_owned())
+            .collect::<Vec<KnowledgeTestMeta>>();
+          }   
+        Ok(v)
     }
     async fn list_simple_by_search_text(
         &self,
@@ -205,6 +276,9 @@ impl KTestManager for DBPostgres {
     async fn unasign(&self, unasign: models::dtos::UnAsignReq) -> Result<(), DBError> {
         todo!()
     }
+    async fn get_ktest_session_result_with_test_priv_meta(&self, test_session_id: i32) 
+    -> Result<KTestResultWithTestPrivMeta, DBError> 
+    {todo!()}
 }
 
 #[async_trait]

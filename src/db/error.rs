@@ -21,4 +21,14 @@ impl From<Box<dyn Error>> for DBError {
         DBError::OtherErr(val)    
     }
 }
+impl From<sqlx::error::Error> for DBError { 
 
+    fn from(value: sqlx::error::Error) -> Self {
+        match value { 
+            sqlx::error::Error::Io(e) => DBError::DBIOError(e.to_string()), // TODO: improve
+            // Can't decode - return as Other.
+            _ => DBError::OtherErr(Box::new(value))
+        }
+
+    }
+}
