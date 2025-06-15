@@ -116,6 +116,7 @@ impl UsersSessionManager for DBPostgres {
     }
     async fn resolve_user_session_to_id(&self, uuid: Uuid) -> Result<Option<i32>, Box<dyn Error>> {
         let mut exe = self.pool.acquire().await?;
+        trace!("I WILL REQUEST {uuid}");
         let mut r = query!(
             r#"SELECT user_id FROM user_sessions
         WHERE sid = $1 AND NOW() < expires_at "#,
@@ -180,16 +181,17 @@ impl KTestManager for DBPostgres {
 
 
         }
+
         // Insert test, relate it to all questions
-        tid = query_scalar!(r#"INSERT INTO tests (title, description, duration, pass_score)
-        VALUES ($1,$2,$3,$4) RETURNING id  "#,
-        test.title, test.description, test.max_duration_seconds,
-     test.minimum_pass_score as i16).fetch_one(&mut *exe).await?;
+        tid = query!(r#"INSERT INTO tests (title, duration, pass_score, created_at) VALUES ($1, $2 ,$3, NOW()) RETURNING id;  "#,
+        test.title, test.max_duration_seconds,
+     test.minimum_pass_score ).fetch_one(&mut *exe).await?.id;
+     
 
         // And relate!
         for i in vec_qid { 
             query!("INSERT INTO tests_questions_pool 
-            (test_id, question_id) VALUES ($1, $2) ", tid, i)
+            (test_id, question_id) VALUES ($1, $2); ", tid, i)
             .execute(&mut *exe).await?;
         }
         // Seems like we done.
@@ -231,8 +233,8 @@ impl KTestManager for DBPostgres {
                     Some(str) => str,
                     None => "".to_string()
                  },
-            minimum_pass_score: u8::try_from(o.minimum_pass_score).unwrap(),            
-            max_duraton: o.max_duration as i64,
+            minimum_pass_score: i16::try_from(o.minimum_pass_score).unwrap(),            
+            max_duraton: o.max_duration ,
             question_count: match o.count 
             {Some(qcount) => qcount.try_into().unwrap(), None => 0} // NOTE: Impossible state, consider emmit error. Also there no reason for types missmached.
           })}}).collect();

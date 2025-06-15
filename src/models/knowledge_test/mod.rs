@@ -72,7 +72,7 @@ pub struct KnolewdgeTestPriv {
     pub title: String,
     pub description: String,
     pub max_duration_seconds: i32, // TODO:  consider change to chrono::Datetime
-    pub minimum_pass_score: u8,
+    pub minimum_pass_score: i16,
     pub questions: Vec<QuestionPriv>,
 }
 #[derive(Clone, Deserialize, Serialize, ToSchema)]
@@ -80,8 +80,8 @@ pub struct KnowledgeTestMeta {
     pub id: i32, 
     pub title: String,  
     pub description: String, 
-    pub max_duraton: i64, 
-    pub minimum_pass_score: u8, 
+    pub max_duraton: i32, 
+    pub minimum_pass_score: i16, 
     pub question_count: i32,
 
 }
