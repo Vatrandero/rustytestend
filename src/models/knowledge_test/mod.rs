@@ -71,7 +71,7 @@ pub struct KnolewdgeTestPriv {
     pub id: i32,
     pub title: String,
     pub description: String,
-    pub max_duration_seconds: i64, // TODO:  consider change to chrono::Datetime
+    pub max_duration_seconds: i32, // TODO:  consider change to chrono::Datetime
     pub minimum_pass_score: u8,
     pub questions: Vec<QuestionPriv>,
 }

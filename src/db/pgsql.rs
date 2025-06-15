@@ -118,7 +118,7 @@ impl UsersSessionManager for DBPostgres {
         let mut exe = self.pool.acquire().await?;
         let mut r = query!(
             r#"SELECT user_id FROM user_sessions
-        WHERE sid = $1 "#,
+        WHERE sid = $1 AND NOW() < expires_at "#,
             uuid
         )
         .fetch_one(&mut *exe)
@@ -148,15 +148,17 @@ impl UsersSessionManager for DBPostgres {
 }
 #[async_trait]
 impl KTestManager for DBPostgres {
-    async fn create_new(&self, test: KnolewdgeTestPriv) -> Result<(), DBError> {
+    async fn create_new(&self, test: KnolewdgeTestPriv) -> Result<i32, DBError> {
         let mut exe = self.pool.begin().await?;
         // Test object should be already validated on API side.
         // Let's assume object is valid.
-
+        let tid: i32; // We will return this after creation.
+        let mut vec_qid = Vec::with_capacity(test.questions.len());
         'questloop: for i in &test.questions{ 
         // Insert question, get generated  id
         let qid = query_scalar!(r#"INSERT INTO questions (question_text)
         VALUES ($1) RETURNING id"#,  i.question_body).fetch_one(&mut *exe).await?;
+        vec_qid.push(qid);
         
         // can we insert closed answers?
         match &i.answers {
@@ -178,10 +180,23 @@ impl KTestManager for DBPostgres {
 
 
         }
+        // Insert test, relate it to all questions
+        tid = query_scalar!(r#"INSERT INTO tests (title, description, duration, pass_score)
+        VALUES ($1,$2,$3,$4) RETURNING id  "#,
+        test.title, test.description, test.max_duration_seconds,
+     test.minimum_pass_score as i16).fetch_one(&mut *exe).await?;
+
+        // And relate!
+        for i in vec_qid { 
+            query!("INSERT INTO tests_questions_pool 
+            (test_id, question_id) VALUES ($1, $2) ", tid, i)
+            .execute(&mut *exe).await?;
+        }
         // Seems like we done.
         // Try to commit
+
         exe.commit().await?;
-        Ok(())
+        Ok(tid)
 
     }
 
@@ -218,7 +233,8 @@ impl KTestManager for DBPostgres {
                  },
             minimum_pass_score: u8::try_from(o.minimum_pass_score).unwrap(),            
             max_duraton: o.max_duration as i64,
-            question_count: o.minimum_pass_score
+            question_count: match o.count 
+            {Some(qcount) => qcount.try_into().unwrap(), None => 0} // NOTE: Impossible state, consider emmit error. Also there no reason for types missmached.
           })}}).collect();
           if let Some (er) = r.iter().find_map(|o| o.as_ref().err() ){
             return Err(DBError::DBDataError(er.to_string()));

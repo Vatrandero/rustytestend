@@ -46,7 +46,7 @@ pub trait UsersSessionManager {
 #[async_trait]
 pub trait KTestManager {
     /// creates new tet on database side.
-    async fn create_new(&self, test: KnolewdgeTestPriv) -> Result<(), DBError>;
+    async fn create_new(&self, test: KnolewdgeTestPriv) -> Result<i32, DBError>;
 
     // List and search
 
